@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Lock, AlertCircle } from 'lucide-react';
 
 // Admin password - in production, use environment variable
-const ADMIN_PASSWORD = 'admin123';
+const ADMIN_PASSWORD = 'Khanh2003@';
 
 interface AuthGateProps {
   children: React.ReactNode;
@@ -106,7 +106,7 @@ export function AuthGate({ children }: AuthGateProps) {
           </form>
           
           <p className="mt-4 text-center text-xs text-[#a0a0b0]">
-            Mật khẩu mặc định: admin123
+            Liên hệ admin nếu quên mật khẩu
           </p>
         </CardContent>
       </Card>
