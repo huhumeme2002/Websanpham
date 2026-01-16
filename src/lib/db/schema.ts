@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, varchar } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, varchar, integer } from 'drizzle-orm/pg-core';
 
 export const products = pgTable('products', {
   id: text('id').primaryKey(),
@@ -11,6 +11,7 @@ export const products = pgTable('products', {
   features: text('features').notNull(), // JSON string array
   tag: varchar('tag', { length: 50 }),
   contactLink: text('contact_link').notNull(),
+  sortOrder: integer('sort_order').notNull().default(0),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

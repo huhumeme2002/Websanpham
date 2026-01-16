@@ -6,16 +6,17 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Product, ProductInput } from '@/lib/types';
 import { ProductForm } from './product-form';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
 
 interface ProductManagerProps {
   products: Product[];
   onAdd: (data: ProductInput) => void;
   onUpdate: (id: string, data: Partial<Product>) => void;
   onDelete: (id: string) => void;
+  onReorder: (orderedIds: string[]) => void;
 }
 
-export function ProductManager({ products, onAdd, onUpdate, onDelete }: ProductManagerProps) {
+export function ProductManager({ products, onAdd, onUpdate, onDelete, onReorder }: ProductManagerProps) {
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<Product | null>(null);
@@ -37,6 +38,20 @@ export function ProductManager({ products, onAdd, onUpdate, onDelete }: ProductM
       onDelete(deleteConfirm.id);
       setDeleteConfirm(null);
     }
+  };
+
+  const handleMoveUp = (index: number) => {
+    if (index === 0) return;
+    const newOrder = [...products];
+    [newOrder[index - 1], newOrder[index]] = [newOrder[index], newOrder[index - 1]];
+    onReorder(newOrder.map(p => p.id));
+  };
+
+  const handleMoveDown = (index: number) => {
+    if (index === products.length - 1) return;
+    const newOrder = [...products];
+    [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]];
+    onReorder(newOrder.map(p => p.id));
   };
 
   const formatPrice = (price: number) => {
@@ -83,27 +98,50 @@ export function ProductManager({ products, onAdd, onUpdate, onDelete }: ProductM
         </Card>
       ) : (
         <div className="space-y-3">
-          {products.map((product) => (
+          {products.map((product, index) => (
             <Card key={product.id} className="bg-[#1a1a2e] border-[#2a2a3e]">
               <CardContent className="py-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3">
-                      <h3 className="font-semibold text-white">{product.name}</h3>
-                      {product.tag && (
-                        <span className="px-2 py-0.5 text-xs rounded-full bg-[#00d4ff]/20 text-[#00d4ff]">
-                          {product.tag}
-                        </span>
-                      )}
+                  <div className="flex items-center gap-3">
+                    <div className="flex flex-col gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleMoveUp(index)}
+                        disabled={index === 0}
+                        className="h-6 w-6 hover:bg-[#00d4ff]/20 disabled:opacity-30"
+                      >
+                        <ChevronUp className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleMoveDown(index)}
+                        disabled={index === products.length - 1}
+                        className="h-6 w-6 hover:bg-[#00d4ff]/20 disabled:opacity-30"
+                      >
+                        <ChevronDown className="w-4 h-4" />
+                      </Button>
                     </div>
-                    <p className="text-[#00ff88] font-bold mt-1">
-                      {product.pricingTiers.length > 1 
-                        ? `${formatPrice(Math.min(...product.pricingTiers.map(t => t.price)))} - ${formatPrice(Math.max(...product.pricingTiers.map(t => t.price)))}`
-                        : formatPrice(product.pricingTiers[0]?.price || 0)
-                      }
-                    </p>
-                    <p className="text-xs text-[#a0a0b0] mt-1">{product.pricingTiers.length} gói giá</p>
-                    <p className="text-sm text-[#a0a0b0] mt-1 line-clamp-1">{product.description}</p>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-[#a0a0b0] w-6">#{index + 1}</span>
+                        <h3 className="font-semibold text-white">{product.name}</h3>
+                        {product.tag && (
+                          <span className="px-2 py-0.5 text-xs rounded-full bg-[#00d4ff]/20 text-[#00d4ff]">
+                            {product.tag}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[#00ff88] font-bold mt-1 ml-6">
+                        {product.pricingTiers.length > 1 
+                          ? `${formatPrice(Math.min(...product.pricingTiers.map(t => t.price)))} - ${formatPrice(Math.max(...product.pricingTiers.map(t => t.price)))}`
+                          : formatPrice(product.pricingTiers[0]?.price || 0)
+                        }
+                      </p>
+                      <p className="text-xs text-[#a0a0b0] mt-1 ml-6">{product.pricingTiers.length} gói giá</p>
+                      <p className="text-sm text-[#a0a0b0] mt-1 ml-6 line-clamp-1">{product.description}</p>
+                    </div>
                   </div>
                   <div className="flex gap-2 ml-4">
                     <Button

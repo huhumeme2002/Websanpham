@@ -20,6 +20,7 @@ function toProduct(dbProduct: typeof products.$inferSelect): Product {
     features: JSON.parse(dbProduct.features),
     tag: dbProduct.tag || undefined,
     contactLink: dbProduct.contactLink,
+    sortOrder: dbProduct.sortOrder,
     createdAt: dbProduct.createdAt.toISOString(),
     updatedAt: dbProduct.updatedAt.toISOString(),
   };
@@ -37,7 +38,7 @@ function toBill(dbBill: typeof bills.$inferSelect): Bill {
 
 // CRUD Operations - Products
 export async function getProducts(): Promise<Product[]> {
-  const result = await db.select().from(products).orderBy(products.createdAt);
+  const result = await db.select().from(products).orderBy(products.sortOrder, products.createdAt);
   return result.map(toProduct);
 }
 
@@ -61,6 +62,7 @@ export async function addProduct(input: ProductInput): Promise<Product> {
     features: JSON.stringify(input.features),
     tag: input.tag || null,
     contactLink: input.contactLink,
+    sortOrder: input.sortOrder ?? 0,
     createdAt: now,
     updatedAt: now,
   };
@@ -86,6 +88,7 @@ export async function updateProduct(id: string, updates: ProductUpdate): Promise
   if (updates.features !== undefined) updateData.features = JSON.stringify(updates.features);
   if (updates.tag !== undefined) updateData.tag = updates.tag || null;
   if (updates.contactLink !== undefined) updateData.contactLink = updates.contactLink;
+  if (updates.sortOrder !== undefined) updateData.sortOrder = updates.sortOrder;
 
   await db.update(products).set(updateData).where(eq(products.id, id));
   return getProductById(id);
@@ -94,6 +97,13 @@ export async function updateProduct(id: string, updates: ProductUpdate): Promise
 export async function deleteProduct(id: string): Promise<boolean> {
   await db.delete(products).where(eq(products.id, id));
   return true;
+}
+
+// Reorder products
+export async function reorderProducts(orderedIds: string[]): Promise<void> {
+  for (let i = 0; i < orderedIds.length; i++) {
+    await db.update(products).set({ sortOrder: i, updatedAt: new Date() }).where(eq(products.id, orderedIds[i]));
+  }
 }
 
 // CRUD Operations - Bills

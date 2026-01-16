@@ -82,6 +82,23 @@ export default function AdminPage() {
     }
   };
 
+  const handleReorderProducts = async (orderedIds: string[]) => {
+    // Optimistic update
+    const reordered = orderedIds.map(id => products.find(p => p.id === id)!).filter(Boolean);
+    setProducts(reordered);
+    
+    try {
+      await fetch('/api/products/reorder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderedIds }),
+      });
+    } catch (error) {
+      console.error('Error reordering products:', error);
+      loadData(); // Reload on error
+    }
+  };
+
   // Bill handlers
   const handleAddBill = async (imageUrl: string, description?: string) => {
     try {
@@ -162,6 +179,7 @@ export default function AdminPage() {
                   onAdd={handleAddProduct}
                   onUpdate={handleUpdateProduct}
                   onDelete={handleDeleteProduct}
+                  onReorder={handleReorderProducts}
                 />
               </TabsContent>
 

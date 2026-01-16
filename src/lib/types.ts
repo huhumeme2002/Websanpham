@@ -16,6 +16,7 @@ export interface Product {
   features: string[];
   tag?: string; // "Best Seller", "Hot", etc.
   contactLink: string; // Zalo or Messenger URL
+  sortOrder: number; // For ordering products
   createdAt: string;
   updatedAt: string;
 }
@@ -34,5 +35,5 @@ export interface SiteConfig {
   contactMessenger: string;
 }
 
-export type ProductInput = Omit<Product, 'id' | 'createdAt' | 'updatedAt'>;
+export type ProductInput = Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'sortOrder'> & { sortOrder?: number };
 export type ProductUpdate = Partial<Omit<Product, 'id' | 'createdAt'>>;
